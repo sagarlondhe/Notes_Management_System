@@ -9,33 +9,18 @@ const errorHandler = require('./middleware/error.middleware.js');
 const { HTTP_STATUS } = require('./utils/constants.js');
 
 const app = express();
+app.set('trust proxy', true);
 
 // Security Middlewares
 app.use(helmet());
 
-// CORS Configuration for API routes only
-const allowedOrigins = process.env.CLIENT_URL ? process.env.CLIENT_URL.split(',') : ['http://localhost:5173', 'http://localhost:3000'];
-const allowAllOrigins = process.env.ALLOW_ALL_CORS === 'true';
-app.use('/api', (req, res, next) => {
-  const serverOrigin = `${req.protocol}://${req.get('host')}`;
-  const origins = [...allowedOrigins, serverOrigin];
-
-  cors({
-    origin: (origin, callback) => {
-      // Allow requests with no origin (like mobile apps or curl)
-      if (!origin) {
-        return callback(null, true);
-      }
-      if (allowAllOrigins || origins.indexOf(origin) !== -1 || origins.includes('*')) {
-        return callback(null, true);
-      }
-      return callback(new Error('Blocked by CORS policy: Request origin not allowed'), false);
-    },
-    methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
-    allowedHeaders: ['Content-Type', 'Authorization'],
-    credentials: true,
-  })(req, res, next);
-});
+// CORS Configuration for all routes
+app.use(cors({
+  origin: true,
+  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+  allowedHeaders: ['Content-Type', 'Authorization'],
+  credentials: true,
+}));
 
 // Body Parsers
 app.use(express.json());
