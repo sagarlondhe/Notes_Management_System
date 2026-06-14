@@ -1,0 +1,11 @@
+{
+  "name": "notes-management-system",
+  "private": true,
+  "scripts": {
+    "build": "cd client && npm install && npm run build",
+    "postinstall": "cd client && npm install && npm run build && cd ../server && npm install"
+  },
+  "engines": {
+    "node": "24.x"
+  }
+}
