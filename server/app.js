@@ -1,3 +1,4 @@
+const path = require('path');
 const express = require('express');
 const cors = require('cors');
 const helmet = require('helmet');
@@ -50,7 +51,26 @@ app.get('/health', (req, res) => {
   });
 });
 
+// Serve React build assets in production
+if (process.env.NODE_ENV === 'production') {
+  const clientBuildPath = path.join(__dirname, '../client/dist');
+  app.use(express.static(clientBuildPath));
+
+  app.get('*', (req, res, next) => {
+    if (req.originalUrl.startsWith('/api')) {
+      return next();
+    }
+    return res.sendFile(path.join(clientBuildPath, 'index.html'));
+  });
+}
+
 // Fallback for Unknown API Endpoints (404 Routing)
+app.use('/api/*', (req, res, next) => {
+  const err = new Error(`Cannot find requested route ${req.originalUrl} on this server`);
+  err.status = HTTP_STATUS.NOT_FOUND;
+  next(err);
+});
+
 app.use('*', (req, res, next) => {
   const err = new Error(`Cannot find requested route ${req.originalUrl} on this server`);
   err.status = HTTP_STATUS.NOT_FOUND;

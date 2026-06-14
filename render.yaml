@@ -1,29 +1,17 @@
 services:
   - type: web_service
-    name: notes-management-backend
+    name: notes-management-app
     env: node
     plan: starter
     region: oregon
     branch: main
-    buildCommand: cd server && npm install
+    buildCommand: cd client && npm install && npm run build && cd ../server && npm install
     startCommand: cd server && npm start
     healthCheckPath: /health
     envVars:
       - key: NODE_ENV
         value: production
       - key: MONGODB_URI
-        value: YOUR_MONGODB_URI_HERE
+        value: mongodb+srv://sdl9764177106_db_user:DEFJhBKqoll593mb@cluster0.p4w7ump.mongodb.net/?appName=Cluster0
       - key: CLIENT_URL
-        value: https://notes-management-client.onrender.com
-
-staticSites:
-  - name: notes-management-client
-    env: static
-    plan: starter
-    region: oregon
-    branch: main
-    buildCommand: cd client && npm install && npm run build
-    publishPath: client/dist
-    envVars:
-      - key: VITE_API_URL
-        value: https://notes-management-backend.onrender.com/api
+        value: https://notes-management-app.onrender.com
