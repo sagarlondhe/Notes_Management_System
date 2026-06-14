@@ -1,3 +1,4 @@
+const fs = require('fs');
 const path = require('path');
 const express = require('express');
 const cors = require('cors');
@@ -51,16 +52,22 @@ app.get('/health', (req, res) => {
   });
 });
 
-// Serve React build assets in production
-if (process.env.NODE_ENV === 'production') {
-  const clientBuildPath = path.join(__dirname, '../client/dist');
+// Serve React build assets when the client build exists
+const clientBuildPath = path.join(__dirname, '../client/dist');
+if (fs.existsSync(clientBuildPath)) {
   app.use(express.static(clientBuildPath));
 
   app.get('*', (req, res, next) => {
-    if (req.originalUrl.startsWith('/api')) {
+    if (req.originalUrl.startsWith('/api') || req.originalUrl === '/health') {
       return next();
     }
-    return res.sendFile(path.join(clientBuildPath, 'index.html'));
+
+    const indexHtml = path.join(clientBuildPath, 'index.html');
+    if (fs.existsSync(indexHtml)) {
+      return res.sendFile(indexHtml);
+    }
+
+    return next();
   });
 }
 
