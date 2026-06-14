@@ -13,28 +13,24 @@ const app = express();
 // Security Middlewares
 app.use(helmet());
 
-// CORS Configuration
+// CORS Configuration for API routes only
 const allowedOrigins = process.env.CLIENT_URL ? process.env.CLIENT_URL.split(',') : ['http://localhost:5173', 'http://localhost:3000'];
-app.use((req, res, next) => {
-  const serverOrigin = `${req.protocol}://${req.get('host')}`;
-  const origins = [...allowedOrigins, serverOrigin];
-
-  cors({
-    origin: (origin, callback) => {
-      // Allow requests with no origin (like mobile apps or curl)
-      if (!origin) {
-        return callback(null, true);
-      }
-      if (origins.indexOf(origin) !== -1 || origins.includes('*')) {
-        return callback(null, true);
-      }
-      return callback(new Error('Blocked by CORS policy: Request origin not allowed'), false);
-    },
-    methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
-    allowedHeaders: ['Content-Type', 'Authorization'],
-    credentials: true,
-  })(req, res, next);
-});
+const corsOptions = {
+  origin: (origin, callback) => {
+    // Allow requests with no origin (like mobile apps or curl)
+    if (!origin) {
+      return callback(null, true);
+    }
+    if (allowedOrigins.indexOf(origin) !== -1 || allowedOrigins.includes('*')) {
+      return callback(null, true);
+    }
+    return callback(new Error('Blocked by CORS policy: Request origin not allowed'), false);
+  },
+  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+  allowedHeaders: ['Content-Type', 'Authorization'],
+  credentials: true,
+};
+app.use('/api', cors(corsOptions));
 
 // Body Parsers
 app.use(express.json());
